@@ -33,7 +33,6 @@ begin
 		else
 		   case state is
 		   	when NoComment =>
-		   		output <= '0';
 		   		If input = SLASH_CHARACTER then
 					state <= Confirming;
 		   		else
@@ -48,14 +47,12 @@ begin
 		   			state <= NoComment;
 		   		end if;
 		   	when CommentBlock =>
-		   		output <= '1';
 		   		if input = STAR_CHARACTER then
 		   			state <= Terminating;
 		   		else
 		   			state <= CommentBlock;
 		   		end if; 
 		   	when CommentLine =>
-		   		output <= '1';
 		   		if input = NEW_LINE_CHARACTER then
 		   			state <= NoComment;
 		   		else 
@@ -71,5 +68,10 @@ begin
 		 end if;
 	end if;
 end process;
+
+output <=  '0' when (state = NoComment) else
+	   '1' when (state = CommentBlock) else
+	   '1' when (state = CommentLine) else
+	   '0';
 
 end behavioral;
