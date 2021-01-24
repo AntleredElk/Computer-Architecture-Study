@@ -38,13 +38,30 @@ END PROCESS;
  
 --TODO: Thoroughly test your FSM
 stim_process: PROCESS
-BEGIN    
-	REPORT "Example case, reading a meaningless character";
-	s_input <= "01011000";
-	WAIT FOR 1 * clk_period;
-	ASSERT (s_output = '0') REPORT "When reading a meaningless character, the output should be '0'" SEVERITY ERROR;
+
+--A character signal should not be sustained for more than, say, 1ns
+constant period: time := 1ns;
+constant ASCII_constant: std_logic_vector(7 downto 0) := "00000000";
+
+BEGIN   
+	--Test Case 1
+	REPORT "Example 1: /*Hello*/";
+	s_input <= SLASH_CHARACTER;
+	WAIT FOR period;
+	s_input <= STAR_CHARACTER;
+	WAIT FOR period;
+	--Prints "Hello"
+	for index in 0 to 5 loop
+		s_input <= ASCII_constant;
+		WAIT FOR period;
+	end loop;
+	s_input <= STAR_CHARACTER;
+	WAIT FOR period;
+	s_input <= SLASH_CHARACTER;
+	WAIT FOR period;
+	ASSERT (s_output = '0') REPORT "/*Hello*/ should be '0'" SEVERITY ERROR;
 	REPORT "_______________________";
-    
-	WAIT;
+	-- End Test Case 1
+
 END PROCESS stim_process;
 END;
