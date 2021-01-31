@@ -44,98 +44,114 @@ constant period: time := 1ns;
 constant ASCII_constant: std_logic_vector(7 downto 0) := "00000000";
 
 BEGIN   
+	-- Read the asserts as: What came immediately before it is either a comment or not. 
+	-- NOTE: Assert 0 means what came immediately before is not a comment
+	--	 Assert 1 means what came immediately before is a comment
+	
 	--Test Case 1
-	REPORT "Example 1: /*Hello*/";
+	REPORT "Example 1: /*ASCII\n*/";
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	s_input <= STAR_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '1') REPORT "Comment start /*Hello*/: Output should be '1'" SEVERITY ERROR;
-	for index in 0 to 5 loop
-		s_input <= ASCII_constant;
-		WAIT FOR period;
-	end loop;
+	ASSERT (s_output = '0') REPORT "Comment start /*ASCII\n*/: Output should be '0'" SEVERITY ERROR;
+	s_input <= ASCII_constant;
+	WAIT FOR period;
+	s_input <= NEW_LINE_CHARACTER;
+	WAIT FOR period;
+	ASSERT (s_output = '1') REPORT "Comment start /*ASCII\n*/: Output should be '1'" SEVERITY ERROR;
 	s_input <= STAR_CHARACTER;
 	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '0') REPORT "End of /*Hello*/: Output should be '0'" SEVERITY ERROR;
+	ASSERT (s_output = '1') REPORT "End of /*ASCII\n*/: Output should be '1'" SEVERITY ERROR;
 	REPORT "_______________________";
 	-- End Test Case 1
 	
 	--Test Case 2
-	REPORT "Example 2: /*Hello*/ASCII_constant";
+	REPORT "Example 2: /*ASCII*ASCII/*/";
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	s_input <= STAR_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '1') REPORT "Comment start /*Hello*/ASCII_constant: Output should be '1'" SEVERITY ERROR;
-
+	ASSERT (s_output = '0') REPORT "Comment start /*ASCII*ASCII/*/: Output should be '0'" SEVERITY ERROR;
 	s_input <= ASCII_constant;
 	WAIT FOR period;
-	
+	s_input <= STAR_CHARACTER;
+	WAIT FOR period;
+	s_input <= ASCII_constant;
+	WAIT FOR period;
+	s_input <= SLASH_CHARACTER;
+	WAIT FOR period;
+	ASSERT (s_output = '1') REPORT "End of /*ASCII*ASCII/*/: Output should be '1'" SEVERITY ERROR;
 	s_input <= STAR_CHARACTER;
 	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
-	for index in 0 to 5 loop
-		s_input <= ASCII_constant;
-		WAIT FOR period;
-	end loop;
-	ASSERT (s_output = '0') REPORT "End of /*Hello*/ASCII_constant: Output should be '0'" SEVERITY ERROR;
+	ASSERT (s_output = '1') REPORT "End of /*ASCII*ASCII/*/: Output should be '1'" SEVERITY ERROR;
 	REPORT "_______________________";
 	-- End Test Case 2
 	
 	--Test Case 3
-	REPORT "Example 3: /*Hello*//";
+	REPORT "Example 3: /*ASCII*//";
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	s_input <= STAR_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '1') REPORT "Comment start /*Hello*//: Output should be '1'" SEVERITY ERROR;
-	for index in 0 to 5 loop
-		s_input <= ASCII_constant;
-		WAIT FOR period;
-	end loop;
+	ASSERT (s_output = '0') REPORT "Comment start /*ASCII*//: Output should be '0'" SEVERITY ERROR;
+	s_input <= ASCII_constant;
+	WAIT FOR period;
 	s_input <= STAR_CHARACTER;
 	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '0') REPORT "End of /*Hello*//: Output should be '0'" SEVERITY ERROR;
+	ASSERT (s_output = '1') REPORT "End of /*ASCII*//: Output should be '1'" SEVERITY ERROR;
 	REPORT "_______________________";
 	-- End Test Case 3
 	
 	-- Test Case 4
-	REPORT "Example 4: //Hello\n";
+	REPORT "Example 4: ///*ASCII*/\n";
+	s_input <= SLASH_CHARACTER;
+	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	ASSERT (s_output = '1') REPORT "Comment start //Hello\n: Output should be '1'" SEVERITY ERROR;
-	for index in 0 to 5 loop
-		s_input <= ASCII_constant;
-		WAIT FOR period;
-	end loop;
+	s_input <= STAR_CHARACTER;
+	WAIT FOR period;
+	s_input <= ASCII_constant;
+	WAIT FOR period;
+	s_input <= STAR_CHARACTER;
+	WAIT FOR period;
+	s_input <= SLASH_CHARACTER;
+	WAIT FOR period;
+	ASSERT (s_output = '1') REPORT "Comment start //Hello\n: Output should be '1'" SEVERITY ERROR;
 	s_input <= NEW_LINE_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '0') REPORT "End of //Hello\n: Output should be '0'" SEVERITY ERROR;
+	ASSERT (s_output = '1') REPORT "End of //Hello\n: Output should be '1'" SEVERITY ERROR;
 	REPORT "_______________________";
 	-- End Test Case 4
 	
 	-- Test Case 5
-	REPORT "Example 5: //Hello";
+	REPORT "Example 5: //ASCII*/\n";
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
 	s_input <= SLASH_CHARACTER;
 	WAIT FOR period;
-	ASSERT (s_output = '1') REPORT "Comment start //Hello: Output should be '1'" SEVERITY ERROR;
-	for index in 0 to 5 loop
-		s_input <= ASCII_constant;
-		WAIT FOR period;
-	end loop;
-	ASSERT (s_output = '1') REPORT "End of //Hello: Output should be '1'" SEVERITY ERROR;
+	ASSERT (s_output = '0') REPORT "Comment start //ASCII*/\n: Output should be '0'" SEVERITY ERROR;
+	s_input <= ASCII_constant;
+	WAIT FOR period;
+	s_input <= STAR_CHARACTER;
+	WAIT FOR period;
+	s_input <= SLASH_CHARACTER;
+	WAIT FOR period;
+	ASSERT (s_output = '1') REPORT "Comment start //ASCII*/\n: Output should be '1'" SEVERITY ERROR;
+	s_input <= NEW_LINE_CHARACTER;
+	WAIT FOR period;
+	ASSERT (s_output = '1') REPORT "End of //ASCII*/\n: Output should be '1'" SEVERITY ERROR;
 	REPORT "_______________________";
 	-- End Test Case 5
 	

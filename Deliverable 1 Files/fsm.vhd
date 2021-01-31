@@ -25,7 +25,7 @@ signal state: t_State;
 
 begin
 
--- Insert your processes here
+-- Finite state machine
 process (clk, reset)
 begin
 	if rising_edge(clk) then
@@ -41,7 +41,6 @@ begin
 		   		end if;
 		   	when Confirming =>
 		   		if input = STAR_CHARACTER then
-		   			--intermediate_input <= "00000000";
 		   			state <= CommentBlock;
 		   		elsif input = SLASH_CHARACTER then
 		   			state <= CommentLine;
@@ -71,20 +70,22 @@ begin
 	end if;
 end process;
 
---process(input)
---begin
---	if input /= STAR_CHARACTER then 
---		intermediate_input = STAR_CHARACTER;
---	else 
---		intermediate_input = "00000000";
---	end if;
---end process;
-
-output <=  '0' when (state = NoComment) else
-	   '0' when (state = Confirming) else
-	   '1' when (state = CommentBlock) else
-	   '1' when (state = CommentLine) else
-	   '1' when (state = Terminating) else
-	   '0';
+-- This process is used to update what's a comment or not only after the starting/ending ASCII symbols and not during
+process(input)
+    begin
+        if    state = NoComment then
+            output <= '0';
+        elsif state = Confirming then
+            output <= '0';
+        elsif state = CommentBlock then
+            output <= '1';
+        elsif state = CommentLine then
+            output <= '1';
+        elsif state = Terminating then
+            output <= '1';
+        else
+            output <= '0';
+        end if;
+    end process;
 	   
 end behavioral;
