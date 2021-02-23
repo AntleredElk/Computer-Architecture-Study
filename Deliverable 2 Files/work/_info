@@ -10,23 +10,23 @@ z2
 cModel Technology
 Z0 d/home/antler/Desktop/ECSE 425/Projects/Deliverable 2 Files
 Ecache
-Z1 w1614055988
+Z1 w1614117695
 Z2 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
 Z3 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z4 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 233
+!i122 504
 R0
 Z5 8cache.vhd
 Z6 Fcache.vhd
 l0
 L5 1
-VZ34Q9bM=WGTMaV:UizDJB1
-!s100 4S5O<a:YHG3H]i;8Y:n9L2
+Vgb^LNW9DjK[[@;8HY]M4P2
+!s100 L[JiK^6]AFJ?M>Cjf9bmf3
 Z7 OV;C;2020.1;71
 32
-Z8 !s110 1614055991
+Z8 !s110 1614117699
 !i10b 1
-Z9 !s108 1614055991.000000
+Z9 !s108 1614117699.000000
 Z10 !s90 -reportprogress|300|cache.vhd|
 Z11 !s107 cache.vhd|
 !i113 1
@@ -35,12 +35,12 @@ Aarch
 R2
 R3
 R4
-DEx4 work 5 cache 0 22 Z34Q9bM=WGTMaV:UizDJB1
-!i122 233
-l59
-L32 124
-VP[jZ1`:Yh;BA3[:Z[ZnXY1
-!s100 h4JUC1`l0W;BWKgSEW9;T2
+DEx4 work 5 cache 0 22 gb^LNW9DjK[[@;8HY]M4P2
+!i122 504
+l58
+L31 147
+V2_d9F7JhadCNGLmH:3CD>0
+!s100 Ja]?^1;n?h^CeUX^d0FR41
 R7
 32
 R8
@@ -51,11 +51,11 @@ R11
 !i113 1
 R12
 Ecache_tb
-Z13 w1614055740
+Z13 w1614116628
 R2
 R3
 R4
-!i122 236
+!i122 507
 R0
 Z14 8cache_tb.vhd
 Z15 Fcache_tb.vhd
@@ -77,11 +77,11 @@ R2
 R3
 R4
 Z18 DEx4 work 8 cache_tb 0 22 i]X^50aNb6mMEU7GdLLX93
-!i122 236
-l75
-Z19 L8 126
-Z20 VWD[2[Y;fWR;KC`Mz53d[f1
-Z21 !s100 K=2LEe]XeLXmPTIe8cUle1
+!i122 507
+l72
+Z19 L8 124
+Z20 VHYA:ij<Jocd7h9>_^n0433
+Z21 !s100 7<P3;52PBNhYT3jh4M`z:0
 R7
 32
 R8
@@ -96,7 +96,7 @@ Z22 w1614055687
 R2
 R3
 R4
-!i122 234
+!i122 505
 R0
 Z23 8memory.vhd
 Z24 Fmemory.vhd
@@ -118,7 +118,7 @@ R2
 R3
 R4
 DEx4 work 6 memory 0 22 if>I=6PajYFom3<A@LFI=1
-!i122 234
+!i122 505
 l29
 L23 48
 VURJOkA1O7;iPV?`Pmi[zU1
@@ -137,7 +137,7 @@ Z27 w1614033233
 R2
 R3
 R4
-!i122 235
+!i122 506
 R0
 Z28 8memory_tb.vhd
 Z29 Fmemory_tb.vhd
@@ -159,7 +159,7 @@ R2
 R3
 R4
 DEx4 work 9 memory_tb 0 22 :gamI`Z?1_z;8ed=KM?Nm2
-!i122 235
+!i122 506
 l38
 L8 79
 V@Dl3oQ1F5JEaJ[^]_8OQ81

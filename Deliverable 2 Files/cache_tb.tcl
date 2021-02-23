@@ -3,8 +3,13 @@ proc AddWaves {} {
     add wave -position end sim:/cache_tb/clk
     add wave -position end sim:/cache_tb/reset
     add wave -position end sim:/cache_tb/s_read
-    add wave -position end sim:/cache_tb/test
+    add wave -position end sim:/cache_tb/s_readdata
     add wave -position end sim:/cache_tb/s_addr
+    add wave -position end sim:/cache_tb/m_addr
+    add wave -position end sim:/cache_tb/m_readdata
+    
+    #add wave -position end sim:/cache_tb/m_addr
+    add wave -position end sim:/cache_tb/m_writedata
 }
 
 vlib work
@@ -25,4 +30,4 @@ force -deposit clk 0 0 ns, 1 0.5 ns -repeat 1 ns
 AddWaves
 
 ;# Run for 50 ns
-run 50ns
+run 100ns

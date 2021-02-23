@@ -28,9 +28,8 @@ port(
     m_readdata : in std_logic_vector (7 downto 0);
     m_write : out std_logic;
     m_writedata : out std_logic_vector (7 downto 0);
-    m_waitrequest : in std_logic;
+    m_waitrequest : in std_logic
     
-    test: out std_logic_vector(4 downto 0)
 );
 end component;
 
@@ -70,8 +69,6 @@ signal m_write : std_logic;
 signal m_writedata : std_logic_vector (7 downto 0);
 signal m_waitrequest : std_logic; 
 
-signal test: std_logic_vector(4 downto 0);
-
 begin
 
 -- Connect the components which we instantiated above to their
@@ -93,9 +90,8 @@ port map(
     m_readdata => m_readdata,
     m_write => m_write,
     m_writedata => m_writedata,
-    m_waitrequest => m_waitrequest,
-    
-    test => test
+    m_waitrequest => m_waitrequest
+
 );
 
 MEM : memory
@@ -122,11 +118,13 @@ test_process : process
 begin
 
 	REPORT "Read Hit test:";
-	s_read <= '1';
 	s_addr <= "11111111111111111111111111111111";
+	s_write <= '1';
 	wait for 10 ns;
 	s_addr <= "11111111111111111111111000001111";
+	s_read <= '1';
 	wait for 10 ns;
+
 	
 end process;
 	
