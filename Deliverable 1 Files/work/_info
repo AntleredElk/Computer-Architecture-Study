@@ -11,11 +11,11 @@ z2
 cModel Technology
 Z0 d/home/antler/Desktop/ECSE 425/Deliverable 1 Files
 Ecomments_fsm
-Z1 w1612061743
+Z1 w1612064325
 Z2 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
 Z3 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z4 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 150
+!i122 154
 R0
 Z5 8fsm.vhd
 Z6 Ffsm.vhd
@@ -25,9 +25,9 @@ VO0]aFJQL^_=a7<L@diSJ[1
 !s100 8=ZD8]48;k_fm406>Zj^M1
 Z7 OV;C;2020.1;71
 32
-Z8 !s110 1612062067
+Z8 !s110 1612498029
 !i10b 1
-Z9 !s108 1612062067.000000
+Z9 !s108 1612498029.000000
 Z10 !s90 -reportprogress|300|fsm.vhd|
 Z11 !s107 fsm.vhd|
 !i113 1
@@ -37,7 +37,7 @@ R2
 R3
 R4
 DEx4 work 12 comments_fsm 0 22 O0]aFJQL^_=a7<L@diSJ[1
-!i122 150
+!i122 154
 l26
 L14 78
 VQGLIjdHd[C@9YSBKKgPoJ0
@@ -52,10 +52,10 @@ R11
 !i113 1
 R12
 Efsm_tb
-Z13 w1612062063
+Z13 w1612064272
 R3
 R4
-!i122 151
+!i122 155
 R0
 Z14 8fsm_tb.vhd
 Z15 Ffsm_tb.vhd
@@ -76,11 +76,11 @@ Abehaviour
 R3
 R4
 Z18 DEx4 work 6 fsm_tb 0 22 TLJfDBz]5fkDA74AdBjcH2
-!i122 151
+!i122 155
 l26
-L7 154
-V0[>e3fa08Ja::aAUEz8K;1
-!s100 5;HbF]?mhQBB5I1U@hnK@0
+Z19 L7 154
+Z20 V0[>e3fa08Ja::aAUEz8K;1
+Z21 !s100 5;HbF]?mhQBB5I1U@hnK@0
 R7
 32
 R8
