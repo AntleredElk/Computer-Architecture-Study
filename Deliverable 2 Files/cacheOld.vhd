@@ -54,116 +54,130 @@ architecture arch of cache is
 	signal temp_s_addr: std_logic_vector(14 downto 0);
 	signal retrieved_address: std_logic_vector (31 downto 0);
 
-	type t_State is (idle, read, write, writeBack, replace);
+	type t_State is (readHit, writeHit, writeBack, readMiss, writeMiss, idle);
 
 	signal state: t_State;
-	signal nextState: t_State; 
 	signal cache_memory: t_cache_memory;
 
-begin
-
-clock_for_FSM: process(clock)
-begin
-	state <= nextState;
-end process;
-
-finite_state_machine: process(s_read, s_write, s_addr, state)
 begin
 
 -- For CPU address
 	temp_s_addr(3 downto 0) <= (others => '0');
 	temp_s_addr(14 downto 4) <= s_addr (14 downto 4);
-	tag_bits <= s_addr (14 downto 9);
+--	tag_bits <= s_addr (14 downto 9);
 	block_index <= s_addr (8 downto 4);
-	block_index_int <= 4*to_integer(unsigned(s_addr (8 downto 4)));
+	--block_index_int <= 4*to_integer(unsigned(block_index));
 	word_index <= s_addr (3 downto 2);
+	--word_index_int <= to_integer(unsigned(word_index));
+	
+	block_index_int <= 4*to_integer(unsigned(s_addr (8 downto 4)));
 	word_index_int <= to_integer(unsigned(s_addr (3 downto 2)));
-
+	
+process (s_read, s_write, s_addr)
+begin	
+	report integer'image(block_index_int);
+	s_waitrequest <= '1';
+	--s_readdata <= s_addr;
+	test1(4 downto 0) <= block_index;
+	--test2 <= in_cache_tag_bits;
+	
 	if block_index_int /= -2147483648 then 
 		retrieved_address <= cache_memory(block_index_int + word_index_int);
 		in_cache_valid_bit <= cache_memory(block_index_int)(15);
 		in_cache_dirty_bit <= cache_memory(block_index_int)(14);
 		in_cache_tag_bits <= cache_memory(block_index_int)(13 downto 8);
 	end if;
-	
-	case state is
-		when idle => 
-			s_waitrequest <= '1';
-			
-			if s_read = '1' then
-				if in_cache_valid_bit = '1' then
-					if in_cache_tag_bits = tag_bits then
-						nextState <= read;
-					else 
-						if in_cache_dirty_bit = '1' then 
-							nextState <= writeBack;
-						else
-							nextState <= replace;
-						end if;
-					end if;
+
+	if s_read = '1' and s_write ='0' then 
+		if in_cache_valid_bit = '1' then
+			if in_cache_tag_bits = s_addr (14 downto 9) then
+				state <= readHit;
+			else
+				if in_cache_dirty_bit = '1' then 
+					state <= writeBack;
 				else
-					nextState <= replace;
+					state <= readMiss;
 				end if;
-			elsif s_write = '1' then
-				if in_cache_valid_bit = '1' then
-					if in_cache_tag_bits = tag_bits then
-						nextState <= write; 
-					else 
-						if in_cache_dirty_bit = '1' then 
-							nextState <= writeBack;
-						else
-							nextState <= replace;
-						end if;
-					end if;
-				else 
-					nextState <= replace; 
-				end if; 
+			end if;
+		else
+			state <= readMiss;
+		end if; 
+		
+	elsif s_write = '1' and s_read = '0' then
+		if in_cache_valid_bit = '1' then 
+			if tag_bits = in_cache_tag_bits then
+				state <= writeHit;
 			else 
-				nextState <= idle;					
-			end if; 
-		when read =>
-		
-			s_readdata<= cache_memory(block_index_int + word_index_int);
+				if in_cache_dirty_bit = '1' then 
+					state <= writeBack;
+				else
+					state <= writeMiss;
+				
+				end if;
+			end if;
 			
-			nextState <= idle; 
+		end if;
+	else 
+		state <= idle;
+	end if;
+	
+	
+end process; 
+
+process(state)
+begin
+
+	   case state is
+	   	-- If CPU is not doing anything
+	   	when idle =>
+	   		report "No Reads or Writes have occured.";
+	   	when readHit =>
+	   		report "Read Hit Occured:";
 			
-			s_waitrequest <= '0';
-			
-		when write => 
-		
-			cache_memory(block_index_int + word_index_int) <= s_writedata; 
+	   		s_readdata <= retrieved_address;
+	   	-- If write hit
+	   	when writeHit =>
+	   		report "Write Hit Occured:";
+			cache_memory(block_index_int + word_index_int)(7 downto 0) <= s_addr(7 downto 0); 
 	   		cache_memory(block_index_int)(13 downto 8) <= tag_bits;
 	   		cache_memory(block_index_int)(14) <= '1';
 	   		cache_memory(block_index_int)(15) <= '1';
 	   		cache_memory(block_index_int)(31 downto 16) <= (others => '0');
+	   		--state <= idle;
 	   		
-	   		nextState <= idle;
-	   		
-	   		s_waitrequest <= '0';
-	   		
-		when writeBack =>
-		
-			m_write <= '1'; 
+	   	-- If cache hit but dirty bit then write-back 
+	   	when writeBack =>
+	   		report "Write Back Occured:";
+	   		-- Write back into memory first 
+	   		m_write <= '1'; 
 	   		
 			m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)));
-	   		m_writedata <= cache_memory(block_index_int)(7 downto 0);
+	   		m_writedata <= temp_s_addr(7 downto 0);
 	   		
 	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0))) + 4;
-	   		m_writedata <= cache_memory(block_index_int + 1)(7 downto 0);
+	   		m_writedata(3 downto 0) <= "0100";
 	   		
 	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0))) + 8;
-	   		m_writedata <= cache_memory(block_index_int + 2)(7 downto 0);
+	   		m_writedata(3 downto 0) <= "1000";
 	   		
 	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0))) + 12;
-	   		m_writedata <= cache_memory(block_index_int + 3)(7 downto 0);
+	   		m_writedata(3 downto 0) <= "1100";
 	   		
 	   		m_write <= '0';
 	   		
-	   		nextState <= replace;
-
-		when replace => 
-		
-			m_read <= '1';
+	   		-- Write to cache
+	   		
+	   		cache_memory(block_index_int)(13 downto 8) <= tag_bits;
+	   		cache_memory(block_index_int)(14) <= '0';
+	   		cache_memory(block_index_int)(15) <= '0';
+	   		cache_memory(block_index_int)(31 downto 16) <= (others => '0');
+	   		--state <= idle;
+	   		
+	   		
+	   	when readMiss =>
+	   		report "Read Miss Occured:";
+	   		
+	   		m_read <= '1';
 	   		
 	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)));
 	   		cache_memory(block_index_int)(7 downto 0) <= m_readdata;
@@ -187,17 +201,48 @@ begin
 	   		cache_memory(block_index_int)(15) <= '1';
 	   		cache_memory(block_index_int)(31 downto 16) <= (others => '0');
 	   		
-	   		-- If Read
-	   		If s_read = '1' then 
-	   			nextState <= read;
-	   		-- If Write
-	   		elsif s_write = '1' then 
-	   			nextState <= write;
-	   		else 
-	   			nextState <= idle;
-	   		end if; 
-	end case; 
-	
-end process;
+	   		s_readdata<= cache_memory(block_index_int + word_index_int); 
+	   		--state <= idle;
+	   		
 
-end arch; 
+	   	-- If write miss 
+	   	when writeMiss =>
+	   	
+	   	 	report "Write Miss Occured:";
+	   	 	m_write <= '1';
+	   	 	
+	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0))) + word_index_int;
+	   		m_writedata <= s_addr(7 downto 0);
+	   		
+	   		m_write <= '0';	   		
+	   		
+	   		m_read <= '1';
+	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)));
+	   		cache_memory(block_index_int)(7 downto 0) <= m_readdata;
+	   		cache_memory(block_index_int)(31 downto 8) <= (others => '0');
+	   		
+	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)))+4; 
+	   		cache_memory(block_index_int+1)(7 downto 0) <= m_readdata; 
+	   		cache_memory(block_index_int+1)(31 downto 8) <= (others => '0');
+	   		
+	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)))+8;
+	   		cache_memory(block_index_int+2)(7 downto 0) <= m_readdata; 
+	   		cache_memory(block_index_int+2)(31 downto 8) <= (others => '0');
+	   		
+	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)))+12;
+	   		cache_memory(block_index_int+3)(7 downto 0) <= m_readdata; 
+	   		cache_memory(block_index_int+3)(31 downto 8) <= (others => '0');
+	   		m_read <= '0';
+	   		
+	   		cache_memory(block_index_int)(13 downto 8) <= tag_bits;
+	   		cache_memory(block_index_int)(14) <= '0';
+	   		cache_memory(block_index_int)(15) <= '1';
+	   		cache_memory(block_index_int)(31 downto 16) <= (others => '0');
+	   		--state <= idle;		
+	   		
+	   end case;
+	s_waitrequest <= '0';
+end process;
+ 
+
+end arch;

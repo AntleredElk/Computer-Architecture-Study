@@ -28,7 +28,9 @@ port(
     m_readdata : in std_logic_vector (7 downto 0);
     m_write : out std_logic;
     m_writedata : out std_logic_vector (7 downto 0);
-    m_waitrequest : in std_logic
+    m_waitrequest : in std_logic;
+	test1: out std_logic_vector (5 downto 0);
+	test2: out std_logic_vector (5 downto 0)
     
 );
 end component;
@@ -68,6 +70,8 @@ signal m_readdata : std_logic_vector (7 downto 0);
 signal m_write : std_logic;
 signal m_writedata : std_logic_vector (7 downto 0);
 signal m_waitrequest : std_logic; 
+signal	test1: std_logic_vector (5 downto 0);
+signal	test2: std_logic_vector (5 downto 0);
 
 begin
 
@@ -90,7 +94,9 @@ port map(
     m_readdata => m_readdata,
     m_write => m_write,
     m_writedata => m_writedata,
-    m_waitrequest => m_waitrequest
+    m_waitrequest => m_waitrequest,
+    test1 => test1,
+    test2 => test2
 
 );
 
@@ -117,13 +123,28 @@ end process;
 test_process : process
 begin
 
-	REPORT "Read Hit test:";
-	s_addr <= "11111111111111111111111111111111";
+	REPORT "***Initializing***";
+	s_read <= '0';
+	s_write <= '0';
+	s_addr <= "00000000000000000000000000000000";
+	wait for clk_period;
+	report "Initializing Zero complete...";
+	
+	report "***Start Testing***";
+
+	report "WRITE MISS TEST:";
+	s_read <= '0';
 	s_write <= '1';
-	wait for 10 ns;
-	s_addr <= "11111111111111111111111000001111";
+	s_writedata <= "00000000000000000000000000000001";
+	s_addr <= "11111111111111111111111111110011";
+	wait until rising_edge(s_waitrequest);
 	s_read <= '1';
-	wait for 10 ns;
+	s_write <= '0';
+	assert s_readdata(7 downto 0) = s_writedata(7 downto 0) report "DATA NOT IN CACHE";
+	wait for clk_period;
+	
+	report "TEST";
+
 
 	
 end process;
