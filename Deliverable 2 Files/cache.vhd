@@ -24,9 +24,7 @@ port(
 	m_readdata : in std_logic_vector (7 downto 0);
 	m_write : out std_logic;
 	m_writedata : out std_logic_vector (7 downto 0);
-	m_waitrequest : in std_logic;
-	test1: out std_logic_vector (5 downto 0);
-	test2: out std_logic_vector (5 downto 0)
+	m_waitrequest : in std_logic
 	
 );
 end cache;
@@ -40,7 +38,7 @@ architecture arch of cache is
 	
 	TYPE t_cache_memory IS ARRAY(number_of_cache_lines-1 downto 0) OF STD_LOGIC_VECTOR(31 downto 0);
 
-	-- For data requested by CPU
+	-- For data requests by CPU
 	signal tag_bits: std_logic_vector (5 downto 0);
 	signal block_index: std_logic_vector (4 downto 0);
 	signal block_index_int: integer;
@@ -62,6 +60,7 @@ architecture arch of cache is
 
 begin
 
+-- Used to update the state of the FSM at each clock cycle
 clock_for_FSM: process(clock)
 begin
 	state <= nextState;
@@ -70,7 +69,7 @@ end process;
 finite_state_machine: process(s_read, s_write, s_addr, state)
 begin
 
--- For CPU address
+	-- For storing CPU data address
 	temp_s_addr(3 downto 0) <= (others => '0');
 	temp_s_addr(14 downto 4) <= s_addr (14 downto 4);
 	tag_bits <= s_addr (14 downto 9);
@@ -78,7 +77,8 @@ begin
 	block_index_int <= 4*to_integer(unsigned(s_addr (8 downto 4)));
 	word_index <= s_addr (3 downto 2);
 	word_index_int <= to_integer(unsigned(s_addr (3 downto 2)));
-
+	
+	-- This blocks ensures that the block index isn't used when it's null and just being initialized
 	if block_index_int /= -2147483648 then 
 		retrieved_address <= cache_memory(block_index_int + word_index_int);
 		in_cache_valid_bit <= cache_memory(block_index_int)(15);
@@ -87,14 +87,18 @@ begin
 	end if;
 	
 	case state is
+		-- Idle state contains all of the logic for branching into other states
 		when idle => 
 			s_waitrequest <= '1';
 			
 			if s_read = '1' then
 				if in_cache_valid_bit = '1' then
 					if in_cache_tag_bits = tag_bits then
+						-- Matching Tag, Valid bit set (dirty bit doesn't matter here)
 						nextState <= read;
 					else 
+						-- Valid bit set, but tag is not matching. 
+						-- Dirty bit important here to determine if writeback or simple block replacement
 						if in_cache_dirty_bit = '1' then 
 							nextState <= writeBack;
 						else
@@ -107,8 +111,11 @@ begin
 			elsif s_write = '1' then
 				if in_cache_valid_bit = '1' then
 					if in_cache_tag_bits = tag_bits then
+						-- Matching Tag, Valid bit set (dirty bit doesn't matter here)
 						nextState <= write; 
 					else 
+						-- Valid bit set, but tag is not matching. 
+						-- Dirty bit important here to determine if writeback or simple block replacement
 						if in_cache_dirty_bit = '1' then 
 							nextState <= writeBack;
 						else
@@ -123,14 +130,14 @@ begin
 			end if; 
 		when read =>
 		
+			-- Simply reads the data in cache
 			s_readdata<= cache_memory(block_index_int + word_index_int);
-			
 			nextState <= idle; 
 			
 			s_waitrequest <= '0';
 			
 		when write => 
-		
+			-- Writes the data to cache
 			cache_memory(block_index_int + word_index_int) <= s_writedata; 
 	   		cache_memory(block_index_int)(13 downto 8) <= tag_bits;
 	   		cache_memory(block_index_int)(14) <= '1';
@@ -142,7 +149,7 @@ begin
 	   		s_waitrequest <= '0';
 	   		
 		when writeBack =>
-		
+			-- Writes the data to main memory
 			m_write <= '1'; 
 	   		
 			m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)));
@@ -162,7 +169,7 @@ begin
 	   		nextState <= replace;
 
 		when replace => 
-		
+			-- Replaces or adds a block from main memory to cache
 			m_read <= '1';
 	   		
 	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)));
@@ -187,10 +194,10 @@ begin
 	   		cache_memory(block_index_int)(15) <= '1';
 	   		cache_memory(block_index_int)(31 downto 16) <= (others => '0');
 	   		
-	   		-- If Read
+	   		-- If Read go to read state
 	   		If s_read = '1' then 
 	   			nextState <= read;
-	   		-- If Write
+	   		-- If Write go to write state
 	   		elsif s_write = '1' then 
 	   			nextState <= write;
 	   		else 

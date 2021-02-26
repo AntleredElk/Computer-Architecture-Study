@@ -28,9 +28,7 @@ port(
     m_readdata : in std_logic_vector (7 downto 0);
     m_write : out std_logic;
     m_writedata : out std_logic_vector (7 downto 0);
-    m_waitrequest : in std_logic;
-	test1: out std_logic_vector (5 downto 0);
-	test2: out std_logic_vector (5 downto 0)
+    m_waitrequest : in std_logic
     
 );
 end component;
@@ -70,8 +68,6 @@ signal m_readdata : std_logic_vector (7 downto 0);
 signal m_write : std_logic;
 signal m_writedata : std_logic_vector (7 downto 0);
 signal m_waitrequest : std_logic; 
-signal	test1: std_logic_vector (5 downto 0);
-signal	test2: std_logic_vector (5 downto 0);
 
 begin
 
@@ -94,9 +90,7 @@ port map(
     m_readdata => m_readdata,
     m_write => m_write,
     m_writedata => m_writedata,
-    m_waitrequest => m_waitrequest,
-    test1 => test1,
-    test2 => test2
+    m_waitrequest => m_waitrequest
 
 );
 
@@ -111,7 +105,6 @@ port map (
     waitrequest => m_waitrequest
 );
 				
-
 clk_process : process
 begin
 	clk <= '0';
@@ -130,20 +123,61 @@ begin
 	wait for clk_period;
 	report "Initializing Zero complete...";
 	
-	report "***Start Testing***";
-
-	report "WRITE MISS TEST:";
+	report "***START TEST***";
+	
+	-- TEST TAG/VALID/!DIRTY/READ or TAG/VALID/DIRTY/READ (READ DATA FROM CACHE)
 	s_read <= '0';
 	s_write <= '1';
 	s_writedata <= "00000000000000000000000000000001";
-	s_addr <= "11111111111111111111111111110011";
+	s_addr <= "11111111111111111111111111111111";
 	wait until rising_edge(s_waitrequest);
 	s_read <= '1';
 	s_write <= '0';
-	assert s_readdata(7 downto 0) = s_writedata(7 downto 0) report "DATA NOT IN CACHE";
+	wait until rising_edge(s_waitrequest);
+	assert s_readdata(7 downto 0) = s_writedata(7 downto 0) report "DATA NOT IN CACHE (#1)";
+	s_read <= '0';
+	s_write <= '0';
 	wait for clk_period;
 	
-	report "TEST";
+	-- TEST !TAG/VALID/DIRTY/READ (WRITEBACK, REPLACE, AND READ DATA FROM CACHE)
+	s_read <= '1';
+	s_write <= '0';
+	s_addr <= "11111111111111111111100111111111";
+	wait until rising_edge(s_waitrequest);
+	assert s_readdata(7 downto 0) /= s_addr(7 downto 0) report "DATA NOT IN CACHE (#2)";
+	s_read <= '0';
+	s_write <= '0';
+	wait for clk_period;
+	
+	-- TEST TAG/VALID/!DIRTY/WRITE or TAG/VALID/DIRTY/WRITE  (WRITE DATA INTO CACHE)
+	s_read <= '0';
+	s_write <= '1';
+	s_writedata <= "00000000000000000000000000010101";
+	s_addr <= "11111111111111111111111111111111";
+	wait until rising_edge(s_waitrequest);
+	s_read <= '1';
+	s_write <= '0';
+	wait until rising_edge(s_waitrequest);
+	assert s_readdata(7 downto 0) = s_writedata(7 downto 0) report "DATA NOT IN CACHE (#3)";
+	s_read <= '0';
+	s_write <= '0';
+	wait for clk_period;
+	
+	-- TEST !TAG/VALID/DIRTY/WRITE (WRITEBACK, REPLACE AND WRITE DATA INTO CACHE)
+	s_read <= '0';
+	s_write <= '1';
+	s_writedata <= "00000000000000000000000101010101";
+	s_addr <= "11111111111111111111000111111111";
+	wait until rising_edge(s_waitrequest);
+	s_read <= '1';
+	s_write <= '0';
+	wait until rising_edge(s_waitrequest);
+	assert s_readdata(7 downto 0) = s_writedata(7 downto 0) report "DATA NOT IN CACHE (#4)";
+	s_read <= '0';
+	s_write <= '0';
+	wait for clk_period;	
+	
+	report "***END TEST***";
 
 
 	
