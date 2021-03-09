@@ -100,8 +100,10 @@ begin
 						-- Valid bit set, but tag is not matching. 
 						-- Dirty bit important here to determine if writeback or simple block replacement
 						if in_cache_dirty_bit = '1' then 
+						
 							nextState <= writeBack;
 						else
+							
 							nextState <= replace;
 						end if;
 					end if;
@@ -171,7 +173,7 @@ begin
 		when replace => 
 			-- Replaces or adds a block from main memory to cache
 			m_read <= '1';
-	   		
+	   					report "this";
 	   		m_addr <= to_integer(unsigned(temp_s_addr(14 downto 0)));
 	   		cache_memory(block_index_int)(7 downto 0) <= m_readdata;
 	   		cache_memory(block_index_int)(31 downto 8) <= (others => '0');

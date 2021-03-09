@@ -1,0 +1,11 @@
+# Current time Tue Mar  9 00:37:02 2021
+# ModelSim - Intel FPGA Edition Stack Trace
+# Program = vish
+# Id = "2020.1"
+# Version = "2020.02"
+# Date = "Feb 28 2020"
+# Platform = "linuxaloem"
+# 0    0xf7d42a20: 'XCloseIM + 0x20' in '/lib/i386-linux-gnu/libX11.so.6'
+# 1    0xfffffffb: '<unknown (@0xfffffffb)>'
+# End of Stack Trace
+

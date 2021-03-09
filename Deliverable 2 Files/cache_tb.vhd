@@ -125,7 +125,8 @@ begin
 	
 	report "***START TEST***";
 	
-	-- TEST TAG/VALID/!DIRTY/READ or TAG/VALID/DIRTY/READ (READ DATA FROM CACHE)
+	-- TEST 1: TAG/VALID/!DIRTY or TAG/VALID/DIRTY (TEST READ AND WRITE FUNCTIONALITY)
+	report "Test #1";
 	s_read <= '0';
 	s_write <= '1';
 	s_writedata <= "00000000000000000000000000000001";
@@ -139,17 +140,19 @@ begin
 	s_write <= '0';
 	wait for clk_period;
 	
-	-- TEST !TAG/VALID/DIRTY/READ (WRITEBACK, REPLACE, AND READ DATA FROM CACHE)
+	-- TEST 2: !TAG/VALID/DIRTY/READ (WRITEBACK, REPLACE, AND READ DATA FROM CACHE)
+	report "Test #2";
 	s_read <= '1';
 	s_write <= '0';
 	s_addr <= "11111111111111111111100111111111";
 	wait until rising_edge(s_waitrequest);
-	assert s_readdata(7 downto 0) /= s_addr(7 downto 0) report "DATA NOT IN CACHE (#2)";
+	assert s_readdata(7 downto 0) = m_writedata(7 downto 0) report "DATA NOT IN CACHE (#2)";
 	s_read <= '0';
 	s_write <= '0';
 	wait for clk_period;
 	
-	-- TEST TAG/VALID/!DIRTY/WRITE or TAG/VALID/DIRTY/WRITE  (WRITE DATA INTO CACHE)
+	-- TEST 3: TAG/VALID/!DIRTY/WRITE or TAG/VALID/DIRTY/WRITE  (WRITE DATA INTO CACHE)
+	report "Test #3";
 	s_read <= '0';
 	s_write <= '1';
 	s_writedata <= "00000000000000000000000000010101";
@@ -163,11 +166,12 @@ begin
 	s_write <= '0';
 	wait for clk_period;
 	
-	-- TEST !TAG/VALID/DIRTY/WRITE (WRITEBACK, REPLACE AND WRITE DATA INTO CACHE)
+	-- TEST 4: !TAG/VALID/DIRTY/WRITE (WRITEBACK, REPLACE AND WRITE DATA INTO CACHE)
+	report "Test #4";
 	s_read <= '0';
 	s_write <= '1';
 	s_writedata <= "00000000000000000000000101010101";
-	s_addr <= "11111111111111111111000111111111";
+	s_addr <= "11111111111111111111100111111111";
 	wait until rising_edge(s_waitrequest);
 	s_read <= '1';
 	s_write <= '0';
@@ -175,7 +179,22 @@ begin
 	assert s_readdata(7 downto 0) = s_writedata(7 downto 0) report "DATA NOT IN CACHE (#4)";
 	s_read <= '0';
 	s_write <= '0';
-	wait for clk_period;	
+	wait for clk_period;
+	
+	-- TEST 5: !VALID (FOR CACHE READ MISS WIHOUT WRITE )
+	report "Test #5";
+	s_read <= '1';
+	s_write <= '0';
+	s_addr <= "11111111111111111111100101111111";
+	wait until rising_edge(s_waitrequest);
+	s_read <= '1';
+	s_write <= '0';
+	s_addr <= "11111111111111111111100101111111";
+	wait until rising_edge(s_waitrequest);
+	assert s_readdata(7 downto 0) = m_readdata(7 downto 0) report "DATA NOT IN CACHE (#5)";
+	s_read <= '0';
+	s_write <= '0';
+	wait for clk_period;		
 	
 	report "***END TEST***";
 
